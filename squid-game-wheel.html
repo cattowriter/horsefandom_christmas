@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦑 สุ่มบัดดี้เกม Squid Game 🎄</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Background decorations */
+        .bg-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+        }
+        
+        .circle { 
+            width: 100px; 
+            height: 100px; 
+            border: 3px solid #ff2e63;
+            border-radius: 50%;
+            top: 10%;
+            left: 10%;
+        }
+        
+        .triangle { 
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 86px solid #ff2e63;
+            top: 70%;
+            right: 15%;
+        }
+        
+        .square { 
+            width: 80px; 
+            height: 80px; 
+            background: #ff2e63;
+            top: 40%;
+            right: 10%;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            color: #ff2e63;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 46, 99, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            color: #0eb6e3;
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+        
+        .center-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ff2e63;
+            box-shadow: 0 0 30px rgba(255, 46, 99, 0.8);
+            z-index: 5;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            margin: 0 auto 40px;
+        }
+        
+        .wheel-pointer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #ff2e63;
+            z-index: 10;
+            filter: drop-shadow(0 4px 8px rgba(255, 46, 99, 0.5));
+        }
+        
+        canvas {
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(255, 46, 99, 0.4),
+                        0 0 80px rgba(14, 182, 227, 0.2);
+            background: #1a1a2e;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .player-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            padding: 10px 25px;
+            font-size: 1rem;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        #spinBtn {
+            background: linear-gradient(135deg, #ff2e63 0%, #ff6b9d 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(255, 46, 99, 0.4);
+        }
+        
+        #spinBtn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 46, 99, 0.6);
+        }
+        
+        #spinBtn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+            color: #999;
+        }
+        
+        #resetBtn {
+            background: linear-gradient(135deg, #0eb6e3 0%, #56c8ff 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(14, 182, 227, 0.4);
+        }
+        
+        #resetBtn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(14, 182, 227, 0.6);
+        }
+        
+        .result {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 46, 99, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .result h2 {
+            color: #ff2e63;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .buddy-name {
+            color: #0eb6e3;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(14, 182, 227, 0.5);
+            margin: 10px 0;
+        }
+        
+        .couple-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff2e63 0%, #ff6b9d 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        
+        .emoji {
+            font-size: 3rem;
+            margin: 10px 0;
+        }
+        
+        .players-list {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(14, 182, 227, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .players-list h3 {
+            color: #0eb6e3;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .player-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 20px;
+            margin: 8px 0;
+            border-radius: 10px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .player-item.selected {
+            background: rgba(255, 46, 99, 0.2);
+            border-color: #ff2e63;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .wheel-container {
+                width: 350px;
+                height: 350px;
+            }
+            
+            button {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+            
+            .buddy-name {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-shapes">
+        <div class="shape circle"></div>
+        <div class="shape triangle"></div>
+        <div class="shape square"></div>
+    </div>
+    
+    <div class="container">
+        <h1>🐴 #ด้อมม้า Secret Santa 🦄</h1>
+        <p class="subtitle">🎄 สุ่มบัดดี้เล่นเกมคริสมาส 🎄</p>
+        
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <canvas id="wheel" width="500" height="500"></canvas>
+            <img src="horse-couple.png" alt="Gi-hun and In-ho" class="center-image" onerror="this.style.display='none'">
+        </div>
+        
+        <div class="button-group">
+            <button id="spinBtn">🎲 หมุนวงล้อ</button>
+            <button id="resetBtn">🔄 รีเซ็ต</button>
+        </div>
+        
+        <div class="player-controls">
+            <button id="addPlayerBtn" class="control-btn">➕ เพิ่มม้า</button>
+            <button id="removePlayerBtn" class="control-btn">➖ ลดม้า</button>
+            <button id="adminBtn" class="control-btn" style="background: rgba(255, 46, 99, 0.2); border-color: #ff2e63;">🔐 โหมดแอดมิน</button>
+        </div>
+        
+        <div class="result" id="result">
+            <p style="color: #888; font-size: 1.1rem;">กดปุ่มหมุนวงล้อเพื่อสุ่มบัดดี้ 🎯</p>
+        </div>
+        
+        <div id="adminPanel" style="display: none; background: rgba(255, 46, 99, 0.1); border: 2px solid #ff2e63; border-radius: 20px; padding: 25px; margin-top: 30px;">
+            <h3 style="color: #ff2e63; margin-bottom: 20px; text-align: center;">⚙️ โหมดแอดมิน</h3>
+            <div id="adminPlayerList"></div>
+            <button id="saveNamesBtn" style="margin-top: 20px; padding: 12px 30px; background: linear-gradient(135deg, #ff2e63 0%, #ff6b9d 100%); color: white; border: none; border-radius: 50px; cursor: pointer; font-family: 'Kanit', sans-serif; font-weight: 600; width: 100%;">💾 บันทึกชื่อจริง</button>
+        </div>
+        
+        <div class="players-list">
+            <h3>👥 รายชื่อผู้เล่นทั้งหมด</h3>
+            <div id="playersList"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const result = document.getElementById('result');
+        const playersList = document.getElementById('playersList');
+        const addPlayerBtn = document.getElementById('addPlayerBtn');
+        const removePlayerBtn = document.getElementById('removePlayerBtn');
+        const adminBtn = document.getElementById('adminBtn');
+        const saveNamesBtn = document.getElementById('saveNamesBtn');
+
+        // รายชื่อผู้เล่น - เริ่มต้น 6 คน
+        let players = [
+            { name: 'ม้าแข่ง #1', emoji: '🐴', picked: false, realName: '' },
+            { name: 'ม้าแข่ง #2', emoji: '🦄', picked: false, realName: '' },
+            { name: 'ม้าแข่ง #3', emoji: '🐴', picked: false, realName: '' },
+            { name: 'ม้าแข่ง #4', emoji: '🦄', picked: false, realName: '' },
+            { name: 'ม้าแข่ง #5', emoji: '🐴', picked: false, realName: '' },
+            { name: 'ม้าแข่ง #6', emoji: '🦄', picked: false, realName: '' },
+        ];
+
+        const colors = ['#1a1a2e', '#ff2e63', '#00d9a3', '#ffffff', '#1a1a2e', '#ff2e63'];
+        const textColors = ['#ffffff', '#ffffff', '#1a1a2e', '#1a1a2e', '#ffffff', '#ffffff'];
+        
+        let currentAngle = 0;
+        let isSpinning = false;
+        let pairings = {}; // เก็บการจับคู่ของแต่ละคน
+        let isAdminMode = false; // โหมดแอดมิน
+        const ADMIN_PASSWORD = 'admin123'; // รหัสแอดมิน - เปลี่ยนได้
+
+        function drawWheel() {
+            const availablePlayers = players.filter(p => !p.picked);
+            if (availablePlayers.length === 0) return;
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 230;
+            const sliceAngle = (2 * Math.PI) / availablePlayers.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            availablePlayers.forEach((player, i) => {
+                const startAngle = currentAngle + i * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                // Draw slice
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+                ctx.strokeStyle = '#1a1a2e';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Draw text
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(startAngle + sliceAngle / 2);
+                ctx.textAlign = 'center';
+                ctx.fillStyle = textColors[i % textColors.length];
+                ctx.font = 'bold 24px Kanit';
+                ctx.fillText(player.name, radius / 1.5, 10);
+                ctx.restore();
+            });
+
+            // Draw center circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 30, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ff2e63';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+
+        function updatePlayersList() {
+            // แบ่งเป็น 2 กลุ่ม: ยังไม่ถูกเลือก และ ถูกเลือกแล้ว
+            const availablePlayers = players.filter(p => !p.picked);
+            const pickedPlayers = players.filter(p => p.picked);
+            
+            let html = '';
+            
+            // แสดงม้าที่ยังเหลือ
+            if (availablePlayers.length > 0) {
+                html += `<div style="margin-bottom: 20px;">
+                    <h4 style="color: #00d9a3; font-size: 1.1rem; margin-bottom: 10px;">🐴 ม้าที่รอสุ่ม (${availablePlayers.length} ตัว)</h4>`;
+                
+                availablePlayers.forEach(player => {
+                    const horseNum = player.name.match(/#(\d+)/)[1];
+                    let displayName = `ม้า #${horseNum}`;
+                    if (isAdminMode && player.realName) {
+                        displayName = `ม้า #${horseNum} (${player.realName})`;
+                    }
+                    
+                    html += `
+                        <div class="player-item">
+                            <span>${player.emoji} ${displayName}</span>
+                            <span style="color: #00d9a3;">⏳ รอสุ่ม</span>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+            
+            // แสดงคู่ที่ถูกเลือกแล้ว
+            if (pickedPlayers.length > 0) {
+                html += `<div>
+                    <h4 style="color: #ff2e63; font-size: 1.1rem; margin-bottom: 10px;">💕 คู่ที่ถูกเลือกแล้ว</h4>`;
+                
+                const processedPairs = new Set();
+                pickedPlayers.forEach(player => {
+                    const horseNum = player.name.match(/#(\d+)/)[1];
+                    const buddy = pairings[player.name];
+                    
+                    if (buddy && !processedPairs.has(player.name)) {
+                        processedPairs.add(player.name);
+                        processedPairs.add(buddy);
+                        
+                        const buddyNum = buddy.match(/#(\d+)/)[1];
+                        let displayName1 = `ม้า #${horseNum}`;
+                        let displayName2 = `ม้า #${buddyNum}`;
+                        
+                        if (isAdminMode) {
+                            const buddyPlayer = players.find(p => p.name === buddy);
+                            if (player.realName) displayName1 = `ม้า #${horseNum} (${player.realName})`;
+                            if (buddyPlayer && buddyPlayer.realName) displayName2 = `ม้า #${buddyNum} (${buddyPlayer.realName})`;
+                        }
+                        
+                        html += `
+                            <div class="player-item selected">
+                                <span>${player.emoji} ${displayName1} 💕 ${displayName2}</span>
+                                <span style="color: #ff2e63;">✅ จับคู่แล้ว</span>
+                            </div>
+                        `;
+                    }
+                });
+                html += `</div>`;
+            }
+            
+            playersList.innerHTML = html;
+        }
+
+        function spin() {
+            const availablePlayers = players.filter(p => !p.picked);
+            if (availablePlayers.length === 0) {
+                result.innerHTML = `
+                    <h2>🎊 เกมจบแล้ว!</h2>
+                    <p style="color: #0eb6e3; font-size: 1.2rem; margin-top: 10px;">
+                        ทุกคนได้บัดดี้แล้ว กดรีเซ็ตเพื่อเล่นใหม่
+                    </p>
+                `;
+                return;
+            }
+            
+            if (availablePlayers.length === 1) {
+                result.innerHTML = `
+                    <h2>⚠️ เหลือคนเดียว!</h2>
+                    <p style="color: #0eb6e3; font-size: 1.2rem; margin-top: 10px;">
+                        ต้องมีอย่างน้อย 2 คนเพื่อจับคู่บัดดี้
+                    </p>
+                `;
+                return;
+            }
+            
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            spinBtn.disabled = true;
+            
+            // แสดงข้อความว่ากำลังสุ่ม
+            result.innerHTML = `
+                <h2 style="color: #ff2e63; font-size: 1.8rem;">🎲 กำลังสุ่ม...</h2>
+                <div class="emoji" style="font-size: 3rem; margin: 20px 0;">🐴🦄</div>
+                <p style="color: #0eb6e3; font-size: 1.2rem;">รอสักครู่นะ!</p>
+            `;
+
+            const spinDuration = 4000;
+            const minRotations = 5;
+            
+            // สุ่มม้าที่จะได้
+            const selectedIndex = Math.floor(Math.random() * availablePlayers.length);
+            const selected = availablePlayers[selectedIndex];
+            
+            // คำนวณมุมให้ถูกต้อง
+            const sliceAngle = (2 * Math.PI) / availablePlayers.length;
+            
+            // ลูกศรอยู่ที่ตำแหน่ง 12 นาฬิกา (บนสุด) = 3π/2 หรือ -π/2
+            // วงล้อวาดจากมุม currentAngle
+            // Slice ที่ index 0 เริ่มที่ currentAngle
+            // เราต้องการให้ slice ที่ selectedIndex มาอยู่ตรงลูกศร
+            
+            // คำนวณตำแหน่งกึ่งกลางของ slice ที่เลือก (เทียบกับ currentAngle = 0)
+            const selectedSliceCenter = selectedIndex * sliceAngle + sliceAngle / 2;
+            
+            // เราต้องการหมุนไปจนกระทั่ง selectedSliceCenter อยู่ที่ตำแหน่งบนสุด (3π/2)
+            // เนื่องจากวงล้อหมุนทวนเข็มนาฬิกา และเราต้องการให้ slice มาอยู่ที่บน
+            const pointerPosition = 3 * Math.PI / 2;  // บนสุด
+            
+            // หามุมที่ต้องหมุนเพิ่ม (นับจาก currentAngle ปัจจุบัน)
+            let targetRotation = pointerPosition - selectedSliceCenter;
+            
+            // ปรับให้เป็นค่าบวก
+            while (targetRotation < 0) {
+                targetRotation += 2 * Math.PI;
+            }
+            
+            // บวกจำนวนรอบที่ต้องการหมุน
+            const totalRotation = minRotations * 2 * Math.PI + targetRotation;
+            
+            const startTime = Date.now();
+            const startAngle = currentAngle;
+
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / spinDuration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                
+                currentAngle = startAngle + totalRotation * easeOut;
+                drawWheel();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    finishSpin(availablePlayers, selected);
+                }
+            }
+
+            animate();
+        }
+        
+        function finishSpin(availablePlayers, selected) {
+            // แสดงว่ากำลังจับคู่ม้าตัวไหน
+            const selectedNum = selected.name.match(/#(\d+)/)[1];
+            result.innerHTML = `
+                <h2 style="color: #ff2e63; font-size: 1.8rem;">⚡ กำลังจับคู่...</h2>
+                <div class="emoji" style="font-size: 4rem; margin: 20px 0;">${selected.emoji}</div>
+                <p style="color: #ffffff; font-size: 1.5rem; font-weight: 600;">ม้าแข่ง #${selectedNum}</p>
+                <p style="color: #0eb6e3; font-size: 1.1rem; margin-top: 10px;">กำลังหาคู่...</p>
+            `;
+            
+            // รอ 1 วินาทีก่อนแสดงผล
+            setTimeout(() => {
+                const availableBuddies = availablePlayers.filter(p => p.name !== selected.name);
+                const buddyIndex = Math.floor(Math.random() * availableBuddies.length);
+                const buddy = availableBuddies[buddyIndex];
+                
+                selected.picked = true;
+                buddy.picked = true;
+                
+                pairings[selected.name] = buddy.name;
+                pairings[buddy.name] = selected.name;
+                
+                showResult(selected, buddy);
+                isSpinning = false;
+                spinBtn.disabled = false;
+                updatePlayersList();
+            }, 1000);
+        }
+
+        function showResult(player, buddy) {
+            // แยกเลขม้าออกมา
+            const playerNum = player.name.match(/#(\d+)/)[1];
+            const buddyNum = buddy.name.match(/#(\d+)/)[1];
+            
+            let html = `
+                <h2 style="color: #ff2e63; font-size: 2rem; margin-bottom: 20px;">🎉 ผลการสุ่ม</h2>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 30px; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div class="emoji" style="font-size: 4rem;">${player.emoji}</div>
+                        <div class="buddy-name" style="font-size: 2.5rem; color: #ff2e63;">ม้า #${playerNum}</div>
+                    </div>
+                    <div style="font-size: 3rem; color: #ff2e63;">💕</div>
+                    <div style="text-align: center;">
+                        <div class="emoji" style="font-size: 4rem;">${buddy.emoji}</div>
+                        <div class="buddy-name" style="font-size: 2.5rem; color: #0eb6e3;">ม้า #${buddyNum}</div>
+                    </div>
+                </div>
+                <div class="couple-tag" style="margin-top: 25px; font-size: 1.1rem;">🐴 คู่บัดดี้คริสมาส 🦄</div>
+                <p style="color: #ffffff; margin-top: 20px; font-size: 1.2rem; font-weight: 600;">
+                    ม้า #${playerNum} จับคู่กับ ม้า #${buddyNum}
+                </p>
+                <p style="color: #0eb6e3; margin-top: 10px; font-size: 1rem;">
+                    เตรียมตัวเล่นเกมคริสมาสด้วยกันนะ! 🎄
+                </p>
+            `;
+            
+            result.innerHTML = html;
+        }
+
+        function reset() {
+            if (isSpinning) return;
+            
+            players.forEach(p => p.picked = false);
+            pairings = {};
+            currentAngle = 0;
+            result.innerHTML = `
+                <p style="color: #888; font-size: 1.1rem;">กดปุ่มหมุนวงล้อเพื่อสุ่มบัดดี้ 🎯</p>
+            `;
+            updatePlayersList();
+            drawWheel();
+        }
+        
+        function addPlayer() {
+            if (isSpinning) return;
+            
+            const nextNumber = players.length + 1;
+            const emoji = nextNumber % 2 === 1 ? '🐴' : '🦄';
+            players.push({
+                name: `ม้าแข่ง #${nextNumber}`,
+                emoji: emoji,
+                picked: false,
+                realName: ''
+            });
+            
+            updatePlayersList();
+            drawWheel();
+            if (isAdminMode) {
+                updateAdminPanel();
+            }
+        }
+        
+        function removePlayer() {
+            if (isSpinning) return;
+            if (players.length <= 2) {
+                alert('ต้องมีอย่างน้อย 2 คนเพื่อเล่นเกม!');
+                return;
+            }
+            
+            // ลบคนสุดท้ายที่ยังไม่ถูกเลือก
+            for (let i = players.length - 1; i >= 0; i--) {
+                if (!players[i].picked) {
+                    players.splice(i, 1);
+                    break;
+                }
+            }
+            
+            updatePlayersList();
+            drawWheel();
+            if (isAdminMode) {
+                updateAdminPanel();
+            }
+        }
+        
+        function toggleAdminMode() {
+            if (!isAdminMode) {
+                const password = prompt('🔐 ป้อนรหัสแอดมิน:');
+                if (password === ADMIN_PASSWORD) {
+                    isAdminMode = true;
+                    document.getElementById('adminPanel').style.display = 'block';
+                    document.getElementById('adminBtn').textContent = '🔓 ปิดโหมดแอดมิน';
+                    document.getElementById('adminBtn').style.background = 'rgba(0, 217, 163, 0.2)';
+                    document.getElementById('adminBtn').style.borderColor = '#00d9a3';
+                    updateAdminPanel();
+                    updatePlayersList();
+                } else if (password !== null) {
+                    alert('❌ รหัสผิด!');
+                }
+            } else {
+                isAdminMode = false;
+                document.getElementById('adminPanel').style.display = 'none';
+                document.getElementById('adminBtn').textContent = '🔐 โหมดแอดมิน';
+                document.getElementById('adminBtn').style.background = 'rgba(255, 46, 99, 0.2)';
+                document.getElementById('adminBtn').style.borderColor = '#ff2e63';
+                updatePlayersList();
+            }
+        }
+        
+        function updateAdminPanel() {
+            const adminPlayerList = document.getElementById('adminPlayerList');
+            adminPlayerList.innerHTML = players.map((player, index) => `
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #fff; display: block; margin-bottom: 5px; font-weight: 600;">
+                        ${player.emoji} ${player.name}
+                    </label>
+                    <input 
+                        type="text" 
+                        id="realName_${index}" 
+                        value="${player.realName}" 
+                        placeholder="ชื่อจริง"
+                        style="width: 100%; padding: 10px; border-radius: 10px; border: 2px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.1); color: white; font-family: 'Kanit', sans-serif;"
+                    >
+                </div>
+            `).join('');
+        }
+        
+        function saveRealNames() {
+            players.forEach((player, index) => {
+                const input = document.getElementById(`realName_${index}`);
+                if (input) {
+                    player.realName = input.value;
+                }
+            });
+            updatePlayersList();
+            alert('✅ บันทึกชื่อจริงเรียบร้อย!');
+        }
+        
+        spinBtn.addEventListener('click', spin);
+        resetBtn.addEventListener('click', reset);
+        addPlayerBtn.addEventListener('click', addPlayer);
+        removePlayerBtn.addEventListener('click', removePlayer);
+        adminBtn.addEventListener('click', toggleAdminMode);
+        saveNamesBtn.addEventListener('click', saveRealNames);
+
+        // Initialize
+        updatePlayersList();
+        drawWheel();
+    </script>
+</body>
+</html>
